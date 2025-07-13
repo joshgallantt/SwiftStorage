@@ -61,7 +61,7 @@ public actor DefaultUserDefaultsStorage: UserDefaultsStorage {
                 }.value
                 userDefaults.set(data, forKey: nsKey(key))
             } catch {
-                throw PersistentStorageError.encodingFailed(namespace: namespace, key: key, underlyingError: error)
+                throw UserDefaultsStorageError.encodingFailed(namespace: namespace, key: key, underlyingError: error)
             }
         }
     }
@@ -79,12 +79,12 @@ public actor DefaultUserDefaultsStorage: UserDefaultsStorage {
         let fullKey = nsKey(key)
 
         /// Creates a type-mismatch error for a found value.
-        func mismatch(found: Any) -> PersistentStorageError {
+        func mismatch(found: Any) -> UserDefaultsStorageError {
             .foundButTypeMismatch(namespace: namespace, key: key, expected: T.self, found: type(of: found))
         }
 
         guard let object = userDefaults.object(forKey: fullKey) else {
-            throw PersistentStorageError.valueNotFound(namespace: namespace, key: key)
+            throw UserDefaultsStorageError.valueNotFound(namespace: namespace, key: key)
         }
 
         switch T.self {
@@ -142,7 +142,7 @@ public actor DefaultUserDefaultsStorage: UserDefaultsStorage {
                     try JSONDecoder().decode(T.self, from: data)
                 }.value
             } catch {
-                throw PersistentStorageError.decodingFailed(namespace: namespace, key: key, underlyingError: error)
+                throw UserDefaultsStorageError.decodingFailed(namespace: namespace, key: key, underlyingError: error)
             }
         }
     }

@@ -22,18 +22,18 @@ actor MockUserDefaultsStorage: UserDefaultsStorage {
             let data = try JSONEncoder().encode(value)
             storage[key] = data
         } catch {
-            throw PersistentStorageError.encodingFailed(namespace: namespace, key: key, underlyingError: error)
+            throw UserDefaultsStorageError.encodingFailed(namespace: namespace, key: key, underlyingError: error)
         }
     }
 
     func get<T: Decodable & Sendable>(forKey key: String) async throws -> T {
         guard let data = storage[key] else {
-            throw PersistentStorageError.valueNotFound(namespace: namespace, key: key)
+            throw UserDefaultsStorageError.valueNotFound(namespace: namespace, key: key)
         }
         do {
             return try JSONDecoder().decode(T.self, from: data)
         } catch {
-            throw PersistentStorageError.decodingFailed(namespace: namespace, key: key, underlyingError: error)
+            throw UserDefaultsStorageError.decodingFailed(namespace: namespace, key: key, underlyingError: error)
         }
     }
 

@@ -161,7 +161,7 @@ final class DefaultUserDefaultsStorageTests: XCTestCase {
 
         // When/Then
         await XCTAssertThrowsErrorAsync(try await self.storage.get(forKey: key) as String) { error in
-            guard let storageError = error as? PersistentStorageError,
+            guard let storageError = error as? UserDefaultsStorageError,
                   case .valueNotFound(let ns, let gotKey) = storageError else {
                 XCTFail("Expected valueNotFound error")
                 return
@@ -178,7 +178,7 @@ final class DefaultUserDefaultsStorageTests: XCTestCase {
 
         // When/Then
         await XCTAssertThrowsErrorAsync(try await self.storage.get(forKey: key) as Int) { error in
-            guard let storageError = error as? PersistentStorageError,
+            guard let storageError = error as? UserDefaultsStorageError,
                   case .valueNotFound(let ns, let gotKey) = storageError else {
                 XCTFail("Expected valueNotFound error")
                 return
@@ -194,7 +194,7 @@ final class DefaultUserDefaultsStorageTests: XCTestCase {
 
         // When/Then
         await XCTAssertThrowsErrorAsync(try await self.storage.get(forKey: key) as Double) { error in
-            guard let storageError = error as? PersistentStorageError,
+            guard let storageError = error as? UserDefaultsStorageError,
                   case .valueNotFound(let ns, let gotKey) = storageError else {
                 XCTFail("Expected valueNotFound error")
                 return
@@ -210,7 +210,7 @@ final class DefaultUserDefaultsStorageTests: XCTestCase {
 
         // When/Then
         await XCTAssertThrowsErrorAsync(try await self.storage.get(forKey: key) as Bool) { error in
-            guard let storageError = error as? PersistentStorageError,
+            guard let storageError = error as? UserDefaultsStorageError,
                   case .valueNotFound(let ns, let gotKey) = storageError else {
                 XCTFail("Expected valueNotFound error")
                 return
@@ -226,7 +226,7 @@ final class DefaultUserDefaultsStorageTests: XCTestCase {
 
         // When/Then
         await XCTAssertThrowsErrorAsync(try await self.storage.get(forKey: key) as Float) { error in
-            guard let storageError = error as? PersistentStorageError,
+            guard let storageError = error as? UserDefaultsStorageError,
                   case .valueNotFound(let ns, let gotKey) = storageError else {
                 XCTFail("Expected valueNotFound error")
                 return
@@ -242,7 +242,7 @@ final class DefaultUserDefaultsStorageTests: XCTestCase {
 
         // When/Then
         await XCTAssertThrowsErrorAsync(try await self.storage.get(forKey: key) as Date) { error in
-            guard let storageError = error as? PersistentStorageError,
+            guard let storageError = error as? UserDefaultsStorageError,
                   case .valueNotFound(let ns, let gotKey) = storageError else {
                 XCTFail("Expected valueNotFound error")
                 return
@@ -258,7 +258,7 @@ final class DefaultUserDefaultsStorageTests: XCTestCase {
 
         // When/Then
         await XCTAssertThrowsErrorAsync(try await self.storage.get(forKey: key) as URL) { error in
-            guard let storageError = error as? PersistentStorageError,
+            guard let storageError = error as? UserDefaultsStorageError,
                   case .valueNotFound(let ns, let gotKey) = storageError else {
                 XCTFail("Expected valueNotFound error")
                 return
@@ -274,7 +274,7 @@ final class DefaultUserDefaultsStorageTests: XCTestCase {
 
         // When/Then
         await XCTAssertThrowsErrorAsync(try await self.storage.get(forKey: key) as Data) { error in
-            guard let storageError = error as? PersistentStorageError,
+            guard let storageError = error as? UserDefaultsStorageError,
                   case .valueNotFound(let ns, let gotKey) = storageError else {
                 XCTFail("Expected valueNotFound error")
                 return
@@ -290,7 +290,7 @@ final class DefaultUserDefaultsStorageTests: XCTestCase {
 
         // When/Then
         await XCTAssertThrowsErrorAsync(try await self.storage.get(forKey: key) as TestObject) { error in
-            guard let storageError = error as? PersistentStorageError,
+            guard let storageError = error as? UserDefaultsStorageError,
                   case .valueNotFound(let ns, let gotKey) = storageError else {
                 XCTFail("Expected valueNotFound error")
                 return
@@ -311,7 +311,7 @@ final class DefaultUserDefaultsStorageTests: XCTestCase {
 
         // Then
         await XCTAssertThrowsErrorAsync(try await self.storage.get(forKey: "removeMe") as String) { error in
-            guard let storageError = error as? PersistentStorageError,
+            guard let storageError = error as? UserDefaultsStorageError,
                   case .valueNotFound = storageError else {
                 XCTFail("Expected valueNotFound error")
                 return
@@ -407,7 +407,7 @@ final class DefaultUserDefaultsStorageTests: XCTestCase {
 
         // When/Then
         await XCTAssertThrowsErrorAsync(try await self.storage.get(forKey: key) as TestObject) { error in
-            guard let storageError = error as? PersistentStorageError,
+            guard let storageError = error as? UserDefaultsStorageError,
                   case .decodingFailed(let ns, let gotKey, _) = storageError else {
                 XCTFail("Expected decodingFailed error")
                 return
@@ -427,7 +427,7 @@ final class DefaultUserDefaultsStorageTests: XCTestCase {
 
         // When/Then
         await XCTAssertThrowsErrorAsync(try await self.storage.put(FailingEncodable(), forKey: "bad")) { error in
-            guard let storageError = error as? PersistentStorageError,
+            guard let storageError = error as? UserDefaultsStorageError,
                   case .encodingFailed(let ns, let key, _) = storageError else {
                 XCTFail("Expected encodingFailed error")
                 return
@@ -461,7 +461,7 @@ final class DefaultUserDefaultsStorageTests: XCTestCase {
 
         // When/Then
         await XCTAssertThrowsErrorAsync(try await self.storage.get(forKey: "typeMismatchKey") as String) { error in
-            guard let storageError = error as? PersistentStorageError,
+            guard let storageError = error as? UserDefaultsStorageError,
                   case .foundButTypeMismatch(let ns, let key, _, _) = storageError else {
                 XCTFail("Expected foundButTypeMismatch error")
                 return
@@ -477,7 +477,7 @@ final class DefaultUserDefaultsStorageTests: XCTestCase {
 
         // When/Then
         await XCTAssertThrowsErrorAsync(try await self.storage.get(forKey: "intButString") as Int) { error in
-            guard let storageError = error as? PersistentStorageError,
+            guard let storageError = error as? UserDefaultsStorageError,
                   case .foundButTypeMismatch(let ns, let key, _, _) = storageError else {
                 XCTFail("Expected foundButTypeMismatch error")
                 return
@@ -493,7 +493,7 @@ final class DefaultUserDefaultsStorageTests: XCTestCase {
 
         // When/Then
         await XCTAssertThrowsErrorAsync(try await self.storage.get(forKey: "doubleButString") as Double) { error in
-            guard let storageError = error as? PersistentStorageError,
+            guard let storageError = error as? UserDefaultsStorageError,
                   case .foundButTypeMismatch(let ns, let key, _, _) = storageError else {
                 XCTFail("Expected foundButTypeMismatch error")
                 return
@@ -509,7 +509,7 @@ final class DefaultUserDefaultsStorageTests: XCTestCase {
 
         // When/Then
         await XCTAssertThrowsErrorAsync(try await self.storage.get(forKey: "urlButString") as URL) { error in
-            guard let storageError = error as? PersistentStorageError,
+            guard let storageError = error as? UserDefaultsStorageError,
                   case .foundButTypeMismatch(let ns, let key, _, _) = storageError else {
                 XCTFail("Expected foundButTypeMismatch error")
                 return
@@ -525,7 +525,7 @@ final class DefaultUserDefaultsStorageTests: XCTestCase {
 
         // When/Then
         await XCTAssertThrowsErrorAsync(try await self.storage.get(forKey: "floatAsString") as String) { error in
-            guard let storageError = error as? PersistentStorageError,
+            guard let storageError = error as? UserDefaultsStorageError,
                   case .foundButTypeMismatch(let ns, let key, _, _) = storageError else {
                 XCTFail("Expected foundButTypeMismatch error")
                 return
@@ -541,7 +541,7 @@ final class DefaultUserDefaultsStorageTests: XCTestCase {
 
         // When/Then
         await XCTAssertThrowsErrorAsync(try await self.storage.get(forKey: "floatButString") as Float) { error in
-            guard let storageError = error as? PersistentStorageError,
+            guard let storageError = error as? UserDefaultsStorageError,
                   case .foundButTypeMismatch(let ns, let key, _, _) = storageError else {
                 XCTFail("Expected foundButTypeMismatch error")
                 return
@@ -557,7 +557,7 @@ final class DefaultUserDefaultsStorageTests: XCTestCase {
 
         // When/Then
         await XCTAssertThrowsErrorAsync(try await self.storage.get(forKey: "dateButInt") as Date) { error in
-            guard let storageError = error as? PersistentStorageError,
+            guard let storageError = error as? UserDefaultsStorageError,
                   case .foundButTypeMismatch(let ns, let key, _, _) = storageError else {
                 XCTFail("Expected foundButTypeMismatch error")
                 return
@@ -573,7 +573,7 @@ final class DefaultUserDefaultsStorageTests: XCTestCase {
 
         // When/Then
         await XCTAssertThrowsErrorAsync(try await self.storage.get(forKey: "dataButString") as Data) { error in
-            guard let storageError = error as? PersistentStorageError,
+            guard let storageError = error as? UserDefaultsStorageError,
                   case .foundButTypeMismatch(let ns, let key, _, _) = storageError else {
                 XCTFail("Expected foundButTypeMismatch error")
                 return

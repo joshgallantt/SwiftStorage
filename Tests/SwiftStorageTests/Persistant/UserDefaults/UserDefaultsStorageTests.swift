@@ -41,7 +41,7 @@ final class UserDefaultsStorageTests: XCTestCase {
         do {
             try await storage.put(bad, forKey: "badKey")
             XCTFail("Expected encoding failure")
-        } catch let PersistentStorageError.encodingFailed(namespace, key, underlyingError) {
+        } catch let UserDefaultsStorageError.encodingFailed(namespace, key, underlyingError) {
             // Then
             XCTAssertEqual(namespace, "UnitTestNamespace")
             XCTAssertEqual(key, "badKey")
@@ -59,7 +59,7 @@ final class UserDefaultsStorageTests: XCTestCase {
         do {
             let _: String = try await storage.get(forKey: key)
             XCTFail("Expected value not found error")
-        } catch let PersistentStorageError.valueNotFound(namespace, foundKey) {
+        } catch let UserDefaultsStorageError.valueNotFound(namespace, foundKey) {
             // Then
             XCTAssertEqual(namespace, "UnitTestNamespace")
             XCTAssertEqual(foundKey, key)
@@ -76,12 +76,12 @@ final class UserDefaultsStorageTests: XCTestCase {
         do {
             let _: Int = try await storage.get(forKey: "key")
             XCTFail("Expected decoding failure")
-        } catch let PersistentStorageError.decodingFailed(namespace, key, underlyingError) {
+        } catch let UserDefaultsStorageError.decodingFailed(namespace, key, underlyingError) {
             // Then
             XCTAssertEqual(namespace, "UnitTestNamespace")
             XCTAssertEqual(key, "key")
             XCTAssertNotNil(underlyingError)
-        } catch let PersistentStorageError.foundButTypeMismatch(namespace, key, _, _) {
+        } catch let UserDefaultsStorageError.foundButTypeMismatch(namespace, key, _, _) {
             // Then
             XCTAssertEqual(namespace, "UnitTestNamespace")
             XCTAssertEqual(key, "key")
@@ -101,7 +101,7 @@ final class UserDefaultsStorageTests: XCTestCase {
         do {
             let _: Int = try await storage.get(forKey: "intKey")
             XCTFail("Expected value not found after removal")
-        } catch PersistentStorageError.valueNotFound {
+        } catch UserDefaultsStorageError.valueNotFound {
             // Expected
         } catch {
             XCTFail("Unexpected error: \(error)")
@@ -139,7 +139,7 @@ final class UserDefaultsStorageTests: XCTestCase {
     func test_givenEncodingFailedError_whenDescription_thenDescriptionIsCorrect() {
         // Given
         let error = NSError(domain: "testDomain", code: 1)
-        let subject = PersistentStorageError.encodingFailed(namespace: "TestSpace", key: "key1", underlyingError: error)
+        let subject = UserDefaultsStorageError.encodingFailed(namespace: "TestSpace", key: "key1", underlyingError: error)
         
         // When
         let description = subject.description
@@ -152,7 +152,7 @@ final class UserDefaultsStorageTests: XCTestCase {
     func test_givenDecodingFailedError_whenDescription_thenDescriptionIsCorrect() {
         // Given
         let error = NSError(domain: "decodeDomain", code: 2)
-        let subject = PersistentStorageError.decodingFailed(namespace: "OtherSpace", key: "key2", underlyingError: error)
+        let subject = UserDefaultsStorageError.decodingFailed(namespace: "OtherSpace", key: "key2", underlyingError: error)
         
         // When
         let description = subject.description
@@ -164,7 +164,7 @@ final class UserDefaultsStorageTests: XCTestCase {
 
     func test_givenValueNotFoundError_whenDescription_thenDescriptionIsCorrect() {
         // Given
-        let subject = PersistentStorageError.valueNotFound(namespace: "SomeSpace", key: "unknownKey")
+        let subject = UserDefaultsStorageError.valueNotFound(namespace: "SomeSpace", key: "unknownKey")
         
         // When
         let description = subject.description
@@ -175,7 +175,7 @@ final class UserDefaultsStorageTests: XCTestCase {
 
     func test_givenTypeMismatchError_whenDescription_thenDescriptionIsCorrect() {
         // Given
-        let subject = PersistentStorageError.foundButTypeMismatch(
+        let subject = UserDefaultsStorageError.foundButTypeMismatch(
             namespace: "MismatchNS",
             key: "theKey",
             expected: String.self,

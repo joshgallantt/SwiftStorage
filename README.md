@@ -90,16 +90,134 @@ cache.remove("image1") // Publisher emits nil
 cache.clear()
 ```
 
-## <br><br> Error Handling
+#### However, if you prefer Clean Architecture, here is an example:
 
-All relevant storage methods can throw PersistentStorageError:
+**1. Set Up Repository to Use Cache**
 
-- .encodingFailed(namespace:key:underlyingError:)
-- .decodingFailed(namespace:key:underlyingError:)
-- .valueNotFound(namespace:key:)
-- .foundButTypeMismatch(namespace:key:expected:found:)
+```Swift
+import Combine
 
-Handle them with do-catch or check types in tests.
+final class WishlistRepository {
+    private let cache: ObservableMemoryCache<String, Set<String>>
+    private let service: WishlistService
+    private let wishlistKey = "wishlist"
+
+    init(cache: ObservableMemoryCache<String, Set<String>>, service: WishlistService) {
+        self.cache = cache
+        self.service = service
+    }
+
+    func observeIsWishlisted(productID: String) -> AnyPublisher<Bool, Never> {
+        cache.publisher(for: wishlistKey)
+            .map { ids in ids?.contains(productID) ?? false }
+            .eraseToAnyPublisher()
+    }
+
+    func addToWishlist(productID: String) async throws {
+        let updatedIDs = try await service.addProduct(productID: productID)
+        cache.put(wishlistKey, value: Set(updatedIDs))
+    }
+
+    func removeFromWishlist(productID: String) async throws {
+        let updatedIDs = try await service.removeProduct(productID: productID)
+        cache.put(wishlistKey, value: Set(updatedIDs))
+    }
+}
+
+```
+
+**2. Set Up Use Cases to Use Repository**\
+
+```Swift
+struct ObserveProductInWishlistUseCase {
+    private let repository: WishlistRepository
+    init(repository: WishlistRepository) { self.repository = repository }
+
+    func execute(productID: String) -> AnyPublisher<Bool, Never> {
+        repository.observeIsWishlisted(productID: productID)
+    }
+}
+
+struct AddProductToWishlistUseCase {
+    private let repository: WishlistRepository
+    init(repository: WishlistRepository) { self.repository = repository }
+
+    func execute(productID: String) async throws {
+        try await repository.addToWishlist(productID: productID)
+    }
+}
+
+struct RemoveProductFromWishlistUseCase {
+    private let repository: WishlistRepository
+    init(repository: WishlistRepository) { self.repository = repository }
+
+    func execute(productID: String) async throws {
+        try await repository.removeFromWishlist(productID: productID)
+    }
+}
+
+```
+
+**3. Set Up ViewModel to Use UseCase**
+
+```Swift
+import Combine
+import Foundation
+
+@MainActor
+final class WishlistButtonViewModel: ObservableObject {
+    @Published private(set) var isWishlisted: Bool = false
+    
+    private let productID: String
+
+    private let observeProductInWishlist: ObserveProductInWishlistUseCase
+    private let addProductToWishlist: AddProductToWishlistUseCase
+    private let removeProductFromWishlist: RemoveProductFromWishlistUseCase
+
+    private var cancellables = Set<AnyCancellable>()
+
+    init(
+        productID: String,
+        observeProductInWishlist: ObserveProductInWishlistUseCase,
+        addProductToWishlist: AddProductToWishlistUseCase,
+        removeProductFromWishlist: RemoveProductFromWishlistUseCase
+    ) {
+        self.productID = productID
+        self.observeProductInWishlist = observeProductInWishlist
+        self.addProductToWishlist = addProductToWishlist
+        self.removeProductFromWishlist = removeProductFromWishlist
+
+        observeWishlistState()
+    }
+
+    private func observeWishlistState() {
+        observeProductInWishlist.execute(productID: productID)
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] value in
+                self?.isWishlisted = value
+            }
+            .store(in: &cancellables)
+    }
+
+    func toggleWishlist() {
+        let newValue = !isWishlisted
+        isWishlisted = newValue
+
+        Task(priority: .userInitiated) { [self, newValue] in
+            do {
+                if newValue {
+                    try await addProductToWishlist.execute(productID: productID)
+                } else {
+                    try await removeProductFromWishlist.execute(productID: productID)
+                }
+            } catch {
+                await MainActor.run {
+                    isWishlisted = !newValue
+                }
+            }
+        }
+    }
+}
 
 ## <br> License
 
