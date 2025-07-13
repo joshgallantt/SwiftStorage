@@ -92,7 +92,7 @@ cache.clear()
 
 #### However, if you prefer Clean Architecture, here is an example:
 
-**1. Set Up Repository to Use Cache**
+**1. Create your repository and initialise the Cache**
 
 ```Swift
 import Combine
@@ -123,10 +123,9 @@ final class WishlistRepository {
         cache.put(wishlistKey, value: Set(updatedIDs))
     }
 }
-
 ```
 
-**2. Set Up Use Cases to Use Repository**\
+**2. Use Cases use the Cache**
 
 ```Swift
 struct ObserveProductInWishlistUseCase {
@@ -135,6 +134,8 @@ struct ObserveProductInWishlistUseCase {
 
     func execute(productID: String) -> AnyPublisher<Bool, Never> {
         repository.observeIsWishlisted(productID: productID)
+            .removeDuplicates() // Ensures only changes are delivered to ViewModel
+            .eraseToAnyPublisher()
     }
 }
 
@@ -155,10 +156,9 @@ struct RemoveProductFromWishlistUseCase {
         try await repository.removeFromWishlist(productID: productID)
     }
 }
-
 ```
 
-**3. Set Up ViewModel to Use UseCase**
+**3. ViewModels use the Use Cases**
 
 ```Swift
 import Combine
@@ -167,9 +167,8 @@ import Foundation
 @MainActor
 final class WishlistButtonViewModel: ObservableObject {
     @Published private(set) var isWishlisted: Bool = false
-    
-    private let productID: String
 
+    private let productID: String
     private let observeProductInWishlist: ObserveProductInWishlistUseCase
     private let addProductToWishlist: AddProductToWishlistUseCase
     private let removeProductFromWishlist: RemoveProductFromWishlistUseCase
@@ -193,10 +192,7 @@ final class WishlistButtonViewModel: ObservableObject {
     private func observeWishlistState() {
         observeProductInWishlist.execute(productID: productID)
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] value in
-                self?.isWishlisted = value
-            }
-            .store(in: &cancellables)
+            .assign(to: &$isWishlisted)
     }
 
     func toggleWishlist() {
@@ -218,6 +214,7 @@ final class WishlistButtonViewModel: ObservableObject {
         }
     }
 }
+```
 
 ## <br> License
 
