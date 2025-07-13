@@ -21,6 +21,82 @@ final class DefaultMemoryCacheTests: XCTestCase {
         cache = nil
         super.tearDown()
     }
+    
+    struct MyStruct: Equatable {
+        let id: Int
+        let name: String
+    }
+    
+    // MARK: - Struct and List Tests
+    
+    func test_givenEmptyCache_whenPutMyStruct_thenGetReturnsStruct() {
+        // Given
+        let person = MyStruct(id: 10, name: "Alice")
+        let cache = DefaultMemoryCache<String, MyStruct>()
+
+        // When
+        cache.put("user", value: person)
+
+        // Then
+        XCTAssertEqual(cache.get("user"), person)
+        XCTAssertNil(cache.get("missing"))
+    }
+
+    func test_givenEmptyCache_whenPutListOfMyStruct_thenGetReturnsListInSameOrder() {
+        // Given
+        let list = [
+            MyStruct(id: 1, name: "A"),
+            MyStruct(id: 2, name: "B"),
+            MyStruct(id: 3, name: "C")
+        ]
+        let cache = DefaultMemoryCache<String, [MyStruct]>()
+
+        // When
+        cache.put("people", value: list)
+
+        // Then
+        let result = cache.get("people")
+        XCTAssertEqual(result, list)
+        XCTAssertEqual(result?.map { $0.id }, [1, 2, 3])
+    }
+
+    func test_givenCacheWithList_whenPutNewList_thenGetReturnsNewListInOrder() {
+        // Given
+        let firstList = [
+            MyStruct(id: 1, name: "A"),
+            MyStruct(id: 2, name: "B")
+        ]
+        let newList = [
+            MyStruct(id: 5, name: "X"),
+            MyStruct(id: 6, name: "Y")
+        ]
+        let cache = DefaultMemoryCache<String, [MyStruct]>()
+        cache.put("people", value: firstList)
+
+        // When
+        cache.put("people", value: newList)
+
+        // Then
+        let result = cache.get("people")
+        XCTAssertEqual(result, newList)
+        XCTAssertEqual(result?.map { $0.id }, [5, 6])
+    }
+
+    func test_givenCacheWithList_whenRemove_thenGetReturnsNil() {
+        // Given
+        let list = [
+            MyStruct(id: 1, name: "A"),
+            MyStruct(id: 2, name: "B")
+        ]
+        let cache = DefaultMemoryCache<String, [MyStruct]>()
+        cache.put("team", value: list)
+
+        // When
+        cache.remove("team")
+
+        // Then
+        XCTAssertNil(cache.get("team"))
+    }
 
     // MARK: - Basic Put/Get/Remove/Clear
 

@@ -60,14 +60,22 @@ await storage.clear()
 
 ### <br><br> DefaultMemoryCache (no Combine)
 
-A thread-safe, generic in-memory cache with LRU eviction and optional TTL expiry. No observation or publishers, just simple fast key/value storage.
+A thread-safe, generic in-memory cache with LRU eviction and optional TTL expiry. Just simple fast key/value storage. Order is maintained.
 
 ```Swift
-let cache = DefaultMemoryCache<String, Data>(maxSize: 200, expiresAfter: 30)
-cache.put("token", value: tokenData)
-let data = cache.get("token")
+let cache = DefaultMemoryCache<String, [MyStruct]>(maxSize: 200, expiresAfter: 30)
+
+let myList = [
+    MyStruct(id: 1, name: "First"),
+    MyStruct(id: 2, name: "Second")
+]
+
+cache.put("users", value: myList)
+
+let retrieved = cache.get("users")
 
 cache.remove("token")
+
 cache.clear()
 ```
 
