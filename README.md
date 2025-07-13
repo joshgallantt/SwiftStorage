@@ -58,7 +58,7 @@ await storage.clear()
 
 ## <br><br> In-Memory Storage
 
-### <br><br> DefaultMemoryCache (no Combine)
+### <br><br> DefaultMemoryCache
 
 A thread-safe, generic in-memory cache with LRU eviction and optional TTL expiry. Just simple fast key/value storage. Order is maintained.
 
@@ -74,7 +74,7 @@ cache.put("users", value: myList)
 
 let retrieved = cache.get("users")
 
-cache.remove("token")
+cache.remove("users")
 
 cache.clear()
 ```
