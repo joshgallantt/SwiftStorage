@@ -9,13 +9,35 @@
 import Foundation
 
 public protocol UserDefaultsStorage: Actor {
+    /// Namespace prefix to ensure key separation from other uses of the same UserDefaults instance.
     var namespace: String { get }
 
+    /// Stores a codable, sendable value under the given key.
+    /// - Parameters:
+    ///   - value: The value to encode and store.
+    ///   - key: The logical key for this value (un-namespaced).
     func put<T: Encodable & Sendable>(_ value: T, forKey key: String) async throws
+
+    /// Loads and decodes a value of type `T` for the given key.
+    /// - Parameter key: The logical key (un-namespaced).
+    /// - Returns: The decoded value of type `T`.
+    /// - Throws: `PersistentStorageError.valueNotFound` if no value, or `PersistentStorageError.decodingFailed` if decode fails.
     func get<T: Decodable & Sendable>(forKey key: String) async throws -> T
+
+    /// Removes the value for the given key from this namespace.
+    /// - Parameter key: The logical key (un-namespaced).
     func remove(forKey key: String) async
+
+    /// Removes all values in this namespace only.
     func clear() async
+
+    /// Returns all logical keys present in this namespace.
+    /// - Returns: An array of key strings (un-namespaced).
     func allKeys() async -> [String]
+
+    /// Checks if a value exists for the given key in this namespace.
+    /// - Parameter key: The logical key (un-namespaced).
+    /// - Returns: `true` if the key exists, otherwise `false`.
     func contains(_ key: String) async -> Bool
 }
 
