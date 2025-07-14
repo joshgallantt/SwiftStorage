@@ -12,7 +12,7 @@
 
 </div>
 
-Offers type-safe persistent and in-memory storage primitives for caching in Swift applications. It features async/await-based APIs, namespace isolation, robust error handling, and built-in support for UserDefaults and multiple in-memory cache strategies.
+Offers type-safe persistent storage and in-memory caching in Swift applications. It features async/await-based APIs, namespace isolation, robust error handling, and built-in support for UserDefaults and multiple in-memory cache strategies.
 
 ## <br><br> Features
 
